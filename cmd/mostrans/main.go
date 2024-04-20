@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"service/pkg/chat"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -30,7 +31,12 @@ func main() {
 		}
 		return c.Status(200).JSON(resp)
 	})
-
+	go func() {
+		for {
+			log.Println("running...")
+			time.Sleep(5 * time.Second)
+		}
+	}()
 	app.Listen("0.0.0.0:12060")
 }
 
