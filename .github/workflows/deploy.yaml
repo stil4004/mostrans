@@ -29,14 +29,15 @@ jobs:
       #       echo "error: Tag '${{ github.event.inputs.tag }}' not found"
       #       exit 1
       #     fi
+          # go mod download
+          # go build -o mostrans ./cmd/mostrans
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.21
       - name: Build app
         run: |
-          go mod download
-          go build -o mostrans ./cmd/mostrans
+          docker compose up
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
