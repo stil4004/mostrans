@@ -13,13 +13,10 @@ type Response struct {
 	Data string `json:"data"`
 }
 
-var a int = 0
-
 func main() {
 	app := fiber.New()
 	app.Use(cors.New())
 	log.Println(a)
-	a++
 	app.Post("/api/admin/login", func(c *fiber.Ctx) error {
 		log.Println(string(c.Body()))
 		var resp Response = Response{
