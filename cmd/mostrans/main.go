@@ -6,6 +6,7 @@ import (
 	"service/pkg/chat"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type Response struct {
@@ -16,6 +17,7 @@ var a int = 0
 
 func main() {
 	app := fiber.New()
+	app.Use(cors.New)
 	log.Println(a)
 	a++
 	app.Post("/api/admin/login", func(c *fiber.Ctx) error {
