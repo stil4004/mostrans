@@ -1,0 +1,15 @@
+[Unit]
+Description=Mos transport
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/root/apps/mostrans
+ExecStart=/root/apps/mostrans/mostrans
+Restart=always
+RestartSec=4
+StandardOutput=inherit
+EnvironmentFile=/root/apps/mostrans/config.env
+
+[Install]
+WantedBy=multi-user.target
