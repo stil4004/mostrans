@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  mostrans_api:
+    ports:
+      - "12060:12060"
+    network_mode: host
+    # environment:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+#    c - "19000:9000"
