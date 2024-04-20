@@ -16,7 +16,6 @@ type Response struct {
 func main() {
 	app := fiber.New()
 	app.Use(cors.New())
-	log.Println(a)
 	app.Post("/api/admin/login", func(c *fiber.Ctx) error {
 		log.Println(string(c.Body()))
 		var resp Response = Response{
