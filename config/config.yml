@@ -1,0 +1,17 @@
+Server:
+  Host: "0.0.0.0"
+  Port: "12061"
+
+Postgres:
+  host: "80.93.190.50"
+  port: "5432"
+  user: "user"
+  password: "11092003"
+  DBName: "mostrans"
+  sslMode: "disable"
+  pgDriver: "pgx"
+
+AIClient:
+  brig_ai: "0.0.0.0:5000"
+  vandor_eu_ai: ""
+  vendor_ru_ai: ""

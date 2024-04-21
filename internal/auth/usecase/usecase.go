@@ -21,6 +21,7 @@ func NewAuthUseCase(repo auth.Repository) auth.UseCase {
 }
 
 func (a *AuthUseCase) LogIn(ctx context.Context, req auth.LogInRequest) (auth.LogInResponse, error) {
+
 	resp, err := a.repo.CheckLogIn(ctx, auth.CheckLogInRequest{
 		NickName: req.NickName,
 		Password: req.Password,
@@ -36,6 +37,7 @@ func (a *AuthUseCase) LogIn(ctx context.Context, req auth.LogInRequest) (auth.Lo
 			Authenticated: false,
 		}, errors.New("wrong password")
 	}
+
 	// TODO
 	// token := jwt.NewWithClaims(
 	// 	jwt.SigningMethodHS256,
@@ -45,9 +47,19 @@ func (a *AuthUseCase) LogIn(ctx context.Context, req auth.LogInRequest) (auth.Lo
 
 	// 	},
 	// )
+	respUsr, err := a.repo.GetUserByLogin(ctx, auth.GetUserByLoginRequest{
+		NickName: req.NickName,
+	})
+	if err != nil {
+		return auth.LogInResponse{
+			Authenticated: false,
+		}, err
+	}
 
 	return auth.LogInResponse{
-		Authenticated: false,
+		User:          respUsr.UserResp,
+		Authenticated: true,
+		Access:        "efwefwe.sefsefesf.wadawwd",
 	}, nil
 }
 

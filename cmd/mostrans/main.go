@@ -3,11 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"service/config"
+	"service/internal/server"
 	"service/pkg/chat"
-	"time"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type Response struct {
@@ -15,35 +13,19 @@ type Response struct {
 }
 
 func main() {
-	app := fiber.New()
-	app.Use(cors.New())
-	app.Post("/api/admin/login", func(c *fiber.Ctx) error {
-		log.Println(string(c.Body()))
-		var resp Response = Response{
-			Data: "все неправильно, чмо",
-		}
-		return c.Status(200).JSON(resp)
-	})
-	app.Post("/chat", func(c *fiber.Ctx) error {
-		log.Println(string(c.Body()))
-		var resp Response = Response{
-			Data: "хуйню сказала",
-		}
-		return c.Status(200).JSON(resp)
-	})
-	go func() {
-		for {
-			log.Println("running...")
-			time.Sleep(5 * time.Second)
-		}
-	}()
-	
-	app.Listen("0.0.0.0:12060")
+	viperInstance, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Cannot load config. Error: {%s}", err.Error())
+	}
+
+	cfg, err := config.ParseConfig(viperInstance)
+	if err != nil {
+		log.Fatalf("Cannot parse config. Error: {%s}", err.Error())
+	}
+
+	s := server.NewServer(cfg)
+	if err = s.Run(); err != nil {
+		log.Println("err run:", err)
+	}
 }
 
-func main_old() {
-
-	http.HandleFunc("/hell", chat.SocketHandler)
-	http.HandleFunc("/", chat.Helloer)
-	log.Fatal(http.ListenAndServe("localhost:12060", nil))
-}

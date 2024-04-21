@@ -24,14 +24,14 @@ func NewPostgresRepository(db *sqlx.DB) auth.Repository {
 func (p *postgresRepository) CheckLogIn(ctx context.Context, req auth.CheckLogInRequest) (auth.CheckLogInResponse, error) {
 	var (
 		query = `SELECT login, password FROM %[1]s
-		 WHERE login = $1
+		 WHERE login=$1
 		 LIMIT 1;
 		`
 		userDB auth.UserLoginPassword = auth.UserLoginPassword{}
 
-		vals []any = []any{cconstants.AccessTable}
+		// vals []any = []any{cconstants.AccessTable}
 	)
-	requestDB := fmt.Sprintf(query, vals)
+	requestDB := fmt.Sprintf(query, cconstants.AccessTable)
 
 	err := p.db.GetContext(ctx, &userDB, requestDB, req.NickName)
 	if err != nil {
@@ -51,15 +51,14 @@ func (p *postgresRepository) CheckLogIn(ctx context.Context, req auth.CheckLogIn
 
 func (p *postgresRepository) GetUserByLogin(ctx context.Context, req auth.GetUserByLoginRequest) (auth.GetUserByLoginResponse, error) {
 	var (
-		query = `SELECT name, surname FROM %[1]s
-		 WHERE login = $1
+		query = `
+		SELECT name, surname FROM %[1]s
+		 WHERE nickname = $1
 		 LIMIT 1;
 		`
 		userDB auth.User = auth.User{}
-
-		vals []any = []any{cconstants.UserTable}
 	)
-	requestDB := fmt.Sprintf(query, vals)
+	requestDB := fmt.Sprintf(query, cconstants.UserTable)
 
 	err := p.db.GetContext(ctx, &userDB, requestDB, req.NickName)
 	if err != nil {
