@@ -5,7 +5,6 @@ go 1.21.6
 require (
 	github.com/go-resty/resty/v2 v2.12.0
 	github.com/gofiber/fiber/v2 v2.52.4
-	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/jackc/pgx v3.6.2+incompatible
