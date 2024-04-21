@@ -2,10 +2,8 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"service/config"
 	"service/internal/server"
-	"service/pkg/chat"
 )
 
 type Response struct {
@@ -28,4 +26,3 @@ func main() {
 		log.Println("err run:", err)
 	}
 }
-

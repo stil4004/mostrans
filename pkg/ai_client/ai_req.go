@@ -3,6 +3,7 @@ package ai_client
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 )
 
@@ -14,16 +15,19 @@ func (c *ClientAIHttp) GetBrigV1(ctx context.Context, promt string) (GetBrigV1Re
 		request  GetBrigV1Request = GetBrigV1Request{}
 		response BrigV1Response   = BrigV1Response{}
 	)
-
+	log.Println(c.httpClient1.BaseURL)
 	if promt == "" {
-		return GetBrigV1Response{}, errors.New("sent empty data")
+		return GetBrigV1Response{}, errors.New("sent empty data lol")
 	}
 
-	ctx_timeout, cancel := context.WithTimeout(ctx, 15*time.Second)
+	request.Text = promt
+
+	ctx_timeout, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	resp, err := c.httpClient1.R().SetContext(ctx_timeout).SetResult(response).SetBody(request).Post(url)
+	resp, err := c.httpClient1.R().SetHeader("Content-Type", "application/json").SetContext(ctx_timeout).SetResult(response).SetBody(request).Post(url)
 	_ = resp
+	log.Println("CLIENT ", response, resp)
 	if err != nil {
 		return GetBrigV1Response{}, err
 	}

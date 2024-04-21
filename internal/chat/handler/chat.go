@@ -12,13 +12,12 @@ func (h *ChatHandler) ProcessMessage() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		var params chat.ChatRequest
 
-		log.Println(string(ctx.Body()))
-
 		// Token validation
 
 		if err := ctx.BodyParser(&params); err != nil {
 			return err
 		}
+		log.Println(params)
 
 		// TODO handler
 		// resp, err := h.authUC.LogIn(ctx.Context(), auth.LogInRequest{

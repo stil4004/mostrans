@@ -7,6 +7,11 @@ import (
 	authHandler "service/internal/auth/handler"
 	authRepo "service/internal/auth/repo"
 	authUseCase "service/internal/auth/usecase"
+	chatHandler "service/internal/chat/handler"
+	chatRepo "service/internal/chat/repo"
+	chatUsecase "service/internal/chat/usecase"
+
+	"service/pkg/ai_client"
 	"service/pkg/storage"
 
 	"github.com/gofiber/fiber/v2"
@@ -47,9 +52,20 @@ func (s *Server) MapHandlers(app *fiber.App) error {
 	authUC := authUseCase.NewAuthUseCase(authRep)
 	authHandl := authHandler.NewAuthHandler(s.cfg, authUC)
 
+	apiClientUC, err := ai_client.New(s.cfg)
+	if err != nil {
+		return err
+	}
+
+	chatRep := chatRepo.NewChatRepository(db)
+	chatUC := chatUsecase.NewChatUseCase(chatRep, apiClientUC)
+	chatHndl := chatHandler.NewAuthHandler(s.cfg, chatUC)
 	app.Use(cors.New(cors.Config{}))
 
+	chatUC.Cache()
+
 	authHandler.MapAuthRoutes(app, authHandl)
+	chatHandler.MapAuthRoutes(app, chatHndl)
 
 	return nil
 }

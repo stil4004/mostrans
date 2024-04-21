@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"service/internal/auth"
+	"log"
 	"service/internal/cconstants"
 	"service/internal/chat"
 
@@ -19,50 +19,55 @@ func NewChatRepository(db *sqlx.DB) chat.Repository {
 	return &postgresRepository{db: db}
 }
 
-//	GetInfoFromBatch(ctx context.Context, req GetInfoFromBatchRequest) (GetInfoFromBatchResponse, error)
-// GetOneStation(ctx context.Context, req GetOneStationRequest) (GetOneStationResponse, error)
-
 func (p *postgresRepository) GetInfoFromBatch(ctx context.Context, req chat.GetInfoFromBatchRequest) (chat.GetInfoFromBatchResponse, error) {
 	var (
-		query = `SELECT SUM(passenger_count) FROM %[1]s
-		 WHERE login=$1
-		 LIMIT 1;
+		query = `SELECT SUM(passenger_count) ps_count FROM %[1]s
+		 WHERE station_id=(
+			SELECT station_id FROM %[2]s 
+			WHERE station_name=$1
+		 ) AND date=$2
 		`
 		// userDB auth.UserLoginPassword = auth.UserLoginPassword{}
-
+		respDB chat.GetInfoFromBatchRequest = chat.GetInfoFromBatchRequest{}
+		time   string
 		// vals []any = []any{cconstants.AccessTable}
 	)
-	requestDB := fmt.Sprintf(query, cconstants.PassengersTable)
+	requestDB := fmt.Sprintf(query, cconstants.PassengersTable, cconstants.StationsTable)
 
-	err := p.db.GetContext(ctx, &userDB, requestDB, req.NickName)
+	if len(req.Periods) == 1 {
+		time = req.Periods[0]
+	} else if len(req.Periods) > 1 {
+		time = req.Periods[len(req.Periods)-1]
+	}
+	if len(req.Periods) < 1 || len(req.Stations) < 1 {
+		return chat.GetInfoFromBatchResponse{}, errors.New("no data given")
+	}
+
+	err := p.db.GetContext(ctx, &respDB, requestDB, req.Stations[0], time)
 	if err != nil {
+		log.Println(err)
 		return chat.GetInfoFromBatchResponse{}, err
 	}
 
-	return chat.GetInfoFromBatchResponse{}, errors.New("wrong password")
+	return chat.GetInfoFromBatchResponse{}, nil
 }
 
-func (p *postgresRepository) GetUserByLogin(ctx context.Context, req auth.GetUserByLoginRequest) (auth.GetUserByLoginResponse, error) {
+func (p *postgresRepository) GetOneStation(ctx context.Context, req chat.GetOneStationRequest) (chat.GetOneStationResponse, error) {
 	var (
-		query = `
-		SELECT name, surname FROM %[1]s
-		 WHERE nickname = $1
-		 LIMIT 1;
+		query = `SELECT passenger_count ps_count FROM %[1]s
+		 WHERE station_id=(
+			SELECT station_id FROM %[2]s 
+			WHERE station_name=$1
+		 ) AND date=$2
 		`
-		userDB auth.User = auth.User{}
+		respDB chat.GetOneStationResponse = chat.GetOneStationResponse{}
 	)
-	requestDB := fmt.Sprintf(query, cconstants.UserTable)
 
-	err := p.db.GetContext(ctx, &userDB, requestDB, req.NickName)
+	requestDB := fmt.Sprintf(query, cconstants.PassengersTable, cconstants.StationsTable)
+
+	err := p.db.GetContext(ctx, &respDB, requestDB, req.Station, req.Date)
 	if err != nil {
-		return auth.GetUserByLoginResponse{}, err
+		return chat.GetOneStationResponse{}, err
 	}
-
-	if userDB.Name == "" || userDB.Surname == "" {
-		return auth.GetUserByLoginResponse{}, errors.New(" missed some rows ")
-	}
-
-	return auth.GetUserByLoginResponse{
-		UserResp: userDB,
-	}, nil
+	return chat.GetOneStationResponse{}, nil
 }

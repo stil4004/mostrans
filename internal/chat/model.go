@@ -22,7 +22,7 @@ type GetInfoFromBatchRequest struct {
 type GetInfoFromBatchResponse struct {
 	Periods    []string `json:"periods"`
 	Stations   []string `json:"stations"`
-	PeopleFlow int      `json:"passenger_count"`
+	PeopleFlow int      `json:"ps_count"`
 }
 
 type GetOneStationRequest struct {
@@ -31,4 +31,7 @@ type GetOneStationRequest struct {
 }
 
 type GetOneStationResponse struct {
+	Station string `json:"station"`
+	Date    string `json:"date"`
+	Flow    int    `json:"passenger_count" db:"ps_count"`
 }

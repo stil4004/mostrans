@@ -10,26 +10,22 @@ import (
 )
 
 type ClientAIHttp struct {
-	httpClient1  *resty.Client
-	httpClientEu *resty.Client
-	httpClientRu *resty.Client
-
-	log *zap.Logger
+	httpClient1 *resty.Client
+	// httpClientEu *resty.Client
+	// httpClientRu *resty.Client
 }
 
 func New(
 	cfg *config.Config,
-	log *zap.Logger,
 
 ) (UseCase, error) {
 	return &ClientAIHttp{
 		httpClient1: resty.New().
-			SetBaseURL(cfg.AiClient.BaseUrlBrigAI),
-		httpClientEu: resty.New().
-			SetBaseURL(cfg.AiClient.VendorEUAI),
-		httpClientRu: resty.New().
-			SetBaseURL(cfg.AiClient.VendorRUAI),
-		log: log,
+			SetBaseURL("http://80.93.190.50:5000"),
+		// httpClientEu: resty.New().
+		// 	SetBaseURL(cfg.AiClient.VendorEUAI),
+		// httpClientRu: resty.New().
+		// 	SetBaseURL(cfg.AiClient.VendorRUAI),
 	}, nil
 }
 

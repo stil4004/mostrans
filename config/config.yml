@@ -12,6 +12,6 @@ Postgres:
   pgDriver: "pgx"
 
 AIClient:
-  brig_ai: "0.0.0.0:5000"
+  brig_ai: "80.93.190.50:5000"
   vandor_eu_ai: ""
   vendor_ru_ai: ""

@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"service/internal/chat"
 	"service/pkg/ai_client"
@@ -50,7 +51,8 @@ func (c *ChatUseCase) ProcessMessage(ctx context.Context, req chat.ProcessMessag
 			ResponseMessage: msg,
 		}, errors.New("empty data sent")
 	}
-	switch req.AIType {
+	a := req.AIType
+	switch a {
 	case 1:
 		resp, err = c.aiApiClient.GetBrigV1(ctx, req.MessageText)
 		if err != nil {
@@ -58,11 +60,22 @@ func (c *ChatUseCase) ProcessMessage(ctx context.Context, req chat.ProcessMessag
 			c.errResponseMapMtx.Lock()
 			msg := c.errResponseMap[rnd]
 			c.errResponseMapMtx.Unlock()
-
+			log.Println("Err on first", err)
 			return chat.ProcessMessageResponse{
 				ResponseMessage: msg,
 			}, errors.New("empty type sent")
 		}
+		log.Println(resp)
+
+	case 2:
+		rnd := rand.Intn(5)
+		c.errResponseMapMtx.Lock()
+		msg := c.errResponseMap[rnd]
+		c.errResponseMapMtx.Unlock()
+		log.Println("Err on first", err)
+		return chat.ProcessMessageResponse{
+			ResponseMessage: msg,
+		}, errors.New("empty type sent")
 
 	default:
 		resp, err = c.aiApiClient.GetBrigV1(ctx, req.MessageText)
@@ -74,16 +87,32 @@ func (c *ChatUseCase) ProcessMessage(ctx context.Context, req chat.ProcessMessag
 
 			return chat.ProcessMessageResponse{
 				ResponseMessage: msg,
-			}, errors.New("empty type sent")
+			}, errors.New("empty type sent default")
 		}
 	}
-	c.repo.GetInfoFromBatch(ctx, chat.GetInfoFromBatchRequest{
+	responseDB, err := c.repo.GetInfoFromBatch(ctx, chat.GetInfoFromBatchRequest{
 		Periods:  resp.Period,
 		Stations: resp.Stations,
 	})
-	// resp := c.aiApiClient.GetBrigV1()
+	if err != nil {
+		rnd := rand.Intn(5)
+		c.errResponseMapMtx.Lock()
+		msg := c.errResponseMap[rnd]
+		c.errResponseMapMtx.Unlock()
+		log.Println("Error from db", err)
+		return chat.ProcessMessageResponse{
+			ResponseMessage: msg,
+		}, errors.New("error from db")
+	}
 
-	return chat.ProcessMessageResponse{}, nil
+	rnd := rand.Intn(5)
+	c.responseMapMtx.Lock()
+	msg := fmt.Sprintf(c.responseMap[rnd], responseDB.Stations[0], responseDB.PeopleFlow)
+	c.responseMapMtx.Unlock()
+
+	return chat.ProcessMessageResponse{
+		ResponseMessage: msg,
+	}, nil
 }
 
 // func (a *AuthUseCase) LogIn(ctx context.Context, req auth.LogInRequest) (auth.LogInResponse, error) {
@@ -139,6 +168,7 @@ func generatePasswordHashJWT(password string) string {
 func (c *ChatUseCase) Cache() {
 	c.errResponseMapMtx.Lock()
 	c.errResponseMap = map[int]string{
+		0: "К сожалению, не получилось обработать ваш запрос",
 		1: "Извинте я очень старалась, но не смогла обработать ваш запрос...",
 		2: "Видимо произошла какая-то ошибка, попробуйте снова, или измените запрос",
 		3: "Что-то пошло не так, к сожалению не смогла обработать ваш запрос",
@@ -146,4 +176,15 @@ func (c *ChatUseCase) Cache() {
 		5: "Мне очень жаль, но запрос не получилось обработать",
 	}
 	c.errResponseMapMtx.Unlock()
+
+	c.responseMapMtx.Lock()
+	c.responseMap = map[int]string{
+		0: "Похоже вы искали сколько было человек на станции %[1]s - по моим данным это %[2]s  за день",
+		1: "За запрошенное время на станции %[1]s прошло %[2]s человек",
+		2: "Нашла данные по вашему запросу - в это время на станции %[1]s пассажиропоток составил %[2]s человек",
+		3: "Удалось найти информацию по вашему запросу: на станции %[1]s - поток составил %[2]s",
+		4: "Исходя из запрошенных данных поток составил %[2]s на станции  %[1]s",
+		5: "Судя по моим данным, поток на этой станции составил %[2]s",
+	}
+	c.responseMapMtx.Unlock()
 }
