@@ -15,14 +15,14 @@ type ProcessMessageResponse struct {
 }
 
 type GetInfoFromBatchRequest struct {
-	Periods  []string `json:"periods"`
-	Stations []string `json:"stations"`
+	Periods  []string `json:"periods" db:"date"`
+	Stations []string `json:"stations" db:"station"`
 }
 
 type GetInfoFromBatchResponse struct {
-	Periods    []string `json:"periods"`
-	Stations   []string `json:"stations"`
-	PeopleFlow int      `json:"ps_count"`
+	PeopleFlow int      `json:"passenger_count" db:"passenger_count"`
+	Periods    []string `json:"periods" db:"-"`
+	Stations   string   `json:"stations" db:"-"`
 }
 
 type GetOneStationRequest struct {

@@ -6,7 +6,7 @@ const (
 )
 
 const (
-	StationsTable   string = "mostrans.public.stations"
-	BranhesTable    string = "mostrans.public.branches"
-	PassengersTable string = "mostrans.public.passenger_flow"
+	StationsTable   string = "stations"
+	BranhesTable    string = "branches"
+	PassengersTable string = "passenger_flow"
 )
